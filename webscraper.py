@@ -31,16 +31,18 @@ url = scraper.parseArguments()
 response = requests.get(url, timeout=5)
 content = BeautifulSoup(response.content, "html.parser")
 
-arcticle = {}
+article = {}
+print ("Holder: " + scraper.holder)
 for item in content.findAll('div', attrs={"class": scraper.holder}):
-	arcticle["address"] = content.find('h2', attrs={"class": scraper.address_holder}).text.strip()
-	print ("Address: " + arcticle["address"])
+	article["address"] = content.find('h2', attrs={"class": scraper.address_holder}).text.strip()
+	print ("Address: " + article["address"])
 	
-	arcticle["link"] = scraper.base_url + content.find('a', attrs={"class": scraper.link_holder}).get('href')
-	print ("Link: " + arcticle["link"])
+	article["link"] = scraper.base_url + content.find('a', attrs={"class": scraper.link_holder}).get('href')
+	print ("Link: " + article["link"])
 	
-	arcticle["prices"] = PriceInformation(scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
-	print ("Rent: " + arcticle["prices"].rent)
-	print ("Expenses: " + arcticle["prices"].expenses)
+	article["prices"] = PriceInformation(scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
+	print ("Rent: " + article["prices"].rent)
+	print ("Expenses: " + article["prices"].expenses)
 	
+	article = {}
 	print ("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
