@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import sys
+import re
 
 class UrlScraper:
 	def parseArguments(self):
@@ -20,8 +21,10 @@ class UrlScraper:
 class PriceInformation:
 	def __init__(self, holder, rent_class, expenses_class):
 		price_information = content.find('div', attrs={"class": holder})
-		self.rent = price_information.find('p', attrs={"class": rent_class}).text.strip()
-		self.expenses = price_information.find('p', attrs={"class": expenses_class}).text.strip()
+		rent_str = price_information.find('p', attrs={"class": rent_class}).text.strip()
+		self.rent = re.sub("[^0-9]", "", rent_str)
+		expenses_str = price_information.find('p', attrs={"class": expenses_class}).text.strip()
+		self.expenses = re.sub("[^0-9]", "", expenses_str)
 
 scraper = UrlScraper()
 url = scraper.parseArguments()
