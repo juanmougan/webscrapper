@@ -19,12 +19,16 @@ class UrlScraper:
 		return (self.base_url + "/" + self.search_string)
 
 class PriceInformation:
-	def __init__(self, holder, rent_class, expenses_class):
-		price_information = content.find('div', attrs={"class": holder})
+	def __init__(self, item, holder, rent_class, expenses_class):
+		price_information = item.find('div', attrs={"class": holder})
 		rent_str = price_information.find('p', attrs={"class": rent_class}).text.strip()
 		self.rent = re.sub("[^0-9]", "", rent_str)
-		expenses_str = price_information.find('p', attrs={"class": expenses_class}).text.strip()
-		self.expenses = re.sub("[^0-9]", "", expenses_str)
+		expenses_unparsed = price_information.find('p', attrs={"class": expenses_class})
+		if expenses_unparsed is not None:
+			expenses_str = expenses_unparsed.text.strip()
+			self.expenses = re.sub("[^0-9]", "", expenses_str)
+		else:
+			self.expenses = None
 
 scraper = UrlScraper()
 url = scraper.parseArguments()
@@ -34,15 +38,15 @@ content = BeautifulSoup(response.content, "html.parser")
 article = {}
 print ("Holder: " + scraper.holder)
 for item in content.findAll('div', attrs={"class": scraper.holder}):
-	article["address"] = content.find('h2', attrs={"class": scraper.address_holder}).text.strip()
+	article["address"] = item.find('h2', attrs={"class": scraper.address_holder}).text.strip()
 	print ("Address: " + article["address"])
 	
-	article["link"] = scraper.base_url + content.find('a', attrs={"class": scraper.link_holder}).get('href')
+	article["link"] = scraper.base_url + item.find('a', attrs={"class": scraper.link_holder}).get('href')
 	print ("Link: " + article["link"])
 	
-	article["prices"] = PriceInformation(scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
+	article["prices"] = PriceInformation(item, scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
 	print ("Rent: " + article["prices"].rent)
-	print ("Expenses: " + article["prices"].expenses)
+	if article["prices"].expenses is not None:
+		print ("Expenses: " + article["prices"].expenses)
 	
-	article = {}
 	print ("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
