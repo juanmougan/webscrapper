@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import sys
 import re
+import jsons
 
 class UrlScraper:
 	def parseArguments(self):
@@ -29,6 +30,12 @@ class PriceInformation:
 			self.expenses = re.sub("[^0-9]", "", expenses_str)
 		else:
 			self.expenses = None
+	# TODO there's a bug in this serialization for "expenses"
+	def serialize(self):
+		return {
+			rent: int(self.rent), 
+        	expenses: int(self.expenses)
+        }
 
 scraper = UrlScraper()
 url = scraper.parseArguments()
@@ -36,17 +43,14 @@ response = requests.get(url, timeout=5)
 content = BeautifulSoup(response.content, "html.parser")
 
 article = {}
-print ("Holder: " + scraper.holder)
+all_articles = []
 for item in content.findAll('div', attrs={"class": scraper.holder}):
 	article["address"] = item.find('h2', attrs={"class": scraper.address_holder}).text.strip()
-	print ("Address: " + article["address"])
-	
 	article["link"] = scraper.base_url + item.find('a', attrs={"class": scraper.link_holder}).get('href')
-	print ("Link: " + article["link"])
-	
 	article["prices"] = PriceInformation(item, scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
-	print ("Rent: " + article["prices"].rent)
-	if article["prices"].expenses is not None:
-		print ("Expenses: " + article["prices"].expenses)
-	
+
+	all_articles.append(article)
+	print (article)
 	print ("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+
+print (jsons.dumps(all_articles))
