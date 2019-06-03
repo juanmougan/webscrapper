@@ -23,23 +23,14 @@ class PriceInformation:
 	def __init__(self, item, holder, rent_class, expenses_class):
 		price_information = item.find('div', attrs={"class": holder})
 		rent_str = price_information.find('p', attrs={"class": rent_class}).text.strip()
-		self.rent = re.sub("[^0-9]", "", rent_str)
+		self.rent = int(re.sub("[^0-9]", "", rent_str))
 		expenses_unparsed = price_information.find('p', attrs={"class": expenses_class})
 		print ("Type of expenses_unparsed: " + type(expenses_unparsed).__name__)
 		if expenses_unparsed is not None:
 			expenses_str = expenses_unparsed.text.strip()
-			self.expenses = re.sub("[^0-9]", "", expenses_str)
+			self.expenses = int(re.sub("[^0-9]", "", expenses_str))
 		else:
 			self.expenses = None
-	# def serialize(self):
-	# 	return {
-	# 		rent: int(self.rent), 
-	# 		expenses: int(self.expenses)
-	# 	}
-	# def __str__(self):
-	# 	return "rent: {0}\texpenses: {1}".format(self.rent, self.expenses)
-	# def __repr__(self):
-	# 	return self.__str__()
 
 class Article:
 	def __init__(self, address, link, prices):
