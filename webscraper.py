@@ -25,30 +25,40 @@ class PriceInformation:
 		rent_str = price_information.find('p', attrs={"class": rent_class}).text.strip()
 		self.rent = re.sub("[^0-9]", "", rent_str)
 		expenses_unparsed = price_information.find('p', attrs={"class": expenses_class})
+		print ("Type of expenses_unparsed: " + type(expenses_unparsed).__name__)
 		if expenses_unparsed is not None:
 			expenses_str = expenses_unparsed.text.strip()
 			self.expenses = re.sub("[^0-9]", "", expenses_str)
 		else:
 			self.expenses = None
-	# TODO there's a bug in this serialization for "expenses"
-	def serialize(self):
-		return {
-			rent: int(self.rent), 
-        	expenses: int(self.expenses)
-        }
+	# def serialize(self):
+	# 	return {
+	# 		rent: int(self.rent), 
+	# 		expenses: int(self.expenses)
+	# 	}
+	# def __str__(self):
+	# 	return "rent: {0}\texpenses: {1}".format(self.rent, self.expenses)
+	# def __repr__(self):
+	# 	return self.__str__()
+
+class Article:
+	def __init__(self, address, link, prices):
+		self.address = address
+		self.link = link
+		self.prices = prices
 
 scraper = UrlScraper()
 url = scraper.parseArguments()
 response = requests.get(url, timeout=5)
 content = BeautifulSoup(response.content, "html.parser")
 
-article = {}
 all_articles = []
 for item in content.findAll('div', attrs={"class": scraper.holder}):
-	article["address"] = item.find('h2', attrs={"class": scraper.address_holder}).text.strip()
-	article["link"] = scraper.base_url + item.find('a', attrs={"class": scraper.link_holder}).get('href')
-	article["prices"] = PriceInformation(item, scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
+	address = item.find('h2', attrs={"class": scraper.address_holder}).text.strip()
+	link = scraper.base_url + item.find('a', attrs={"class": scraper.link_holder}).get('href')
+	prices = PriceInformation(item, scraper.price_holder, scraper.rent_holder, scraper.expenses_holder)
 
+	article = Article(address, link, prices)
 	all_articles.append(article)
 	print (article)
 	print ("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
