@@ -4,6 +4,8 @@ import sys
 import re
 import jsons
 
+OUTPUT_FILE = "estate.json"
+
 class UrlScraper:
 	def parseArguments(self):
 		if len(sys.argv) < 9:
@@ -25,7 +27,6 @@ class PriceInformation:
 		rent_str = price_information.find('p', attrs={"class": rent_class}).text.strip()
 		self.rent = int(re.sub("[^0-9]", "", rent_str))
 		expenses_unparsed = price_information.find('p', attrs={"class": expenses_class})
-		print ("Type of expenses_unparsed: " + type(expenses_unparsed).__name__)
 		if expenses_unparsed is not None:
 			expenses_str = expenses_unparsed.text.strip()
 			self.expenses = int(re.sub("[^0-9]", "", expenses_str))
@@ -37,6 +38,11 @@ class Article:
 		self.address = address
 		self.link = link
 		self.prices = prices
+
+def prettyPrintToJsonFile(articles):
+	output_file = open(OUTPUT_FILE, "w")
+	output_file.write(jsons.dumps(all_articles, indent=4, sort_keys=True))
+	output_file.close()
 
 scraper = UrlScraper()
 url = scraper.parseArguments()
@@ -51,7 +57,8 @@ for item in content.findAll('div', attrs={"class": scraper.holder}):
 
 	article = Article(address, link, prices)
 	all_articles.append(article)
-	print (article)
+	print(f"Adding {address}	{link}	{prices.rent}	{prices.expenses}")
 	print ("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
 
-print (jsons.dumps(all_articles))
+print ("Will print results to file: " + OUTPUT_FILE)
+prettyPrintToJsonFile(all_articles)
