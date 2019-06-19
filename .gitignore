@@ -4,6 +4,9 @@
 # Added to ignore output file
 estate.json
 
+# FCM credentials
+config/fcm_service_account.json
+
 ### Flask ###
 instance/*
 !instance/.gitignore
